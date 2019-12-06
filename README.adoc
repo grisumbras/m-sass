@@ -1,0 +1,51 @@
+= m-sass
+:version: 0.0.1
+
+image:https://api.bintray.com/packages/grisumbras/conan/m-sass%3Agrisumbras/images/download.svg?version={version}%3Atesting[Download,link=https://bintray.com/grisumbras/conan/m-sass%3Agrisumbras/{version}%3Astable/link]
+image:https://github.com/grisumbras/m-sass/workflows/Build/badge.svg?branch=master[Build status,link=https://github.com/grisumbras/m-sass/actions]
+
+____
+Sass version of m.css
+____
+
+== Install
+
+=== Using https://conan.io[Conan]
+Add the Conan remote that contains the package:
+[source,shell]
+----
+$ conan remote add grisumbras https://api.bintray.com/conan/grisumbras/conan
+----
+
+Then put into your `conanfile.txt`
+[source,ini,subs="attributes+"]
+----
+[requires]
+m-sass/{version}@grisumbras/stable
+----
+
+Or into your `conanfile.py`
+[source,py,subs="attributes+"]
+----
+class YourConan(ConanFile):
+  requires = 'm-sass/{version}@grisumbras/stable'
+----
+
+=== From sources
+[source,shell]
+----
+$ git clone https://github.com/grisumbras/m-sass.git
+$ cd m-sass
+$ b2 install --prefix=<installation prefix>
+----
+
+== Usage
+
+== Maintainer
+Dmitry Arkhipov <grisumbras@gmail.com>
+
+== Contributing
+Patches welcome!
+
+== License
+link:LICENSE[BSL-1.0] (C) 2019 Dmitry Arkhipov

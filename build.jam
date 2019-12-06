@@ -1,0 +1,14 @@
+import package ;
+
+
+project m-sass ;
+constant VERSION : 0.0.1 ;
+
+
+alias libs ;
+
+
+package.install-data install-license : m-sass : LICENSE ;
+
+alias install : install-license ;
+explicit install install-license ;

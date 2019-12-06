@@ -1,0 +1,53 @@
+name: Build
+
+on: push
+
+env:
+  CONAN_UPLOAD: https://api.bintray.com/conan/grisumbras/conan
+  CONAN_LOGIN_USERNAME: grisumbras
+  CONAN_USERNAME: grisumbras
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pull sources
+        uses: actions/checkout@v1
+
+      - name: Configure Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Enable uploads from master
+        if: github.event.ref == 'refs/heads/master'
+        run: echo "::set-env name=CONAN_PASSWORD::$CONAN_PASSWORD"
+        env:
+          CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
+
+      - name: Run CPT
+        uses: grisumbras/run-cpt@v0.2.0
+        env:
+          CONAN_STABLE_BRANCH_PATTERN: '---'
+
+  publish:
+    needs: build
+
+    if: startsWith(github.event.ref, 'refs/tags/')
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pull sources
+        uses: actions/checkout@v1
+
+      - name: Configure Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Promote to stable
+        uses: grisumbras/conan-promote@v0.3.0
+        with:
+          password: ${{ secrets.CONAN_PASSWORD }}
