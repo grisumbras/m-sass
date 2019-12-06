@@ -1,0 +1,178 @@
+$m-namespace: "" !default;
+$m-column-count: 12 !default;
+$m-horizontal-gap: 2rem !default;
+$m-vertical-gap: 2rem !default;
+$m-size-breakpoints:
+  ( t: (0 0)
+  , s: (576px 560px)
+  , m: (768px 750px)
+  , l: (992px 960px)
+  , x: (1200px 1140px)
+  ) !default;
+
+
+@mixin m-nest-here($class) {
+  &#{$class} { @extend #{$class}; }
+}
+
+
+@mixin m-grid-clearfix($ns, $display) {
+  %#{$ns}clearfix-#{$display} {
+    @extend %#{$ns}clearfix-base;
+    &::after { display: $display; }
+  }
+}
+
+
+// Defines top-level rules and placeholder rules
+@mixin m-grid-header($ns, $h, $v) {
+  %#{$ns}nopad {
+    &.#{$ns}nopad, &.#{$ns}nopadx, &.#{$ns}nopadl { padding-left: 0; }
+    &.#{$ns}nopad, &.#{$ns}nopadx, &.#{$ns}nopadr { padding-right: 0; }
+    &.#{$ns}nopad, &.#{$ns}nopady, &.#{$ns}nopadt { padding-top: 0; }
+    &.#{$ns}nopad, &.#{$ns}nopady, &.#{$ns}nopadb { padding-bottom: 0; }
+  }
+
+  %#{$ns}hide { display: none; }
+
+  %#{$ns}clearfix-base {
+    &::after {
+      content: ' ';
+      clear: both;
+    }
+  }
+  @include m-grid-clearfix($ns, block);
+  @include m-grid-clearfix($ns, table);
+
+  %#{$ns}col-position-base {
+    position: relative;
+    padding: $h;
+  }
+
+  *, ::before, ::after { box-sizing: border-box; }
+
+  .#{$ns}container {
+    @extend %#{$ns}nopad;
+    width: 100%;
+    margin: auto;
+    padding-left: $h;
+    padding-right: $h;
+  }
+
+  .#{$ns}row {
+    @extend %#{$ns}clearfix-table;
+    margin-left: -$h;
+    margin-right: -$h;
+  }
+
+  %#{$ns}inflate-base {
+    margin-bottom: $v
+    &:last-child { margin-bottom: 0; }
+  }
+
+  .#{$ns}container-inflate {
+    @extend %#{$ns}inflate-base;
+    &.#{$ns}nopadb { padding-bottom: 0; }
+  }
+}
+
+
+@mixin m-grid-column($ns, $count, $w, $sz) {
+  %#{$ns}col-base-#{$sz} { float: left; }
+
+  .#{$ns}left-#{$sz} {
+    padding-right: $w;
+    float: left;
+  }
+
+  .#{$ns}right-#{$sz} {
+    padding-left: $w;
+    float: right;
+  }
+
+  .#{$ns}center-#{$sz} {
+    margin-left: auto;
+    margin-right: auto;
+    float: none;
+  }
+
+  @for $i from 1 through $count {
+    .#{$ns}col-#{$sz}-#{$i} {
+      @extend %#{$ns}col-base-#{$sz};
+      @include m-nest-here('.#{$ns}center-#{$sz}')
+      @include m-nest-here('.#{$ns}right-#{$sz}')
+      width: $i * 100% / $count;
+    }
+  }
+
+  @for $i from 1 to $count {
+    .#{$ns}push-#{$sz}-#{$i} { left: $i * 100% / $count; }
+    .#{$ns}pull-#{$sz}-#{$i} { right: $i * 100% / $count; }
+  }
+}
+
+
+@mixin m-grid
+  ( $namespace: $m-namespace
+  , $column-count: $m-column-count
+  , $horizontal-gap: $m-horizontal-gap
+  , $vertical-gap: $m-vertical-gap
+  , $sizes: $m-size-breakpoints
+  )
+{
+  $ns: "";
+  @if "" != $namespace { $ns: "#{$namespace}-"; }
+
+  $h: $horizontal-gap / 2;
+  $v: $vertical-gap / 2;
+
+  @include m-grid-header($ns, $h, $v);
+
+  $prev-names: join(null, map-keys($sizes));
+  @each $element in zip($prev-names, map-keys($sizes), map-values($sizes)) {
+    $prev: nth($element, 1);
+    $sz: nth($element, 2);
+    $widths: nth($element, 3);
+
+    .#{$ns}clearfix-#{$sz} { @extend %#{$ns}clearfix-block; }
+    .#{$ns}show-#{$sz} { @extend %#{$ns}hide; }
+
+    @for $i from 1 through $column-count {
+      .#{$ns}col-#{$sz}-#{$i} {
+        @extend %#{$ns}nopad;
+        .#{$ns}row > & { @extend %#{$ns}col-position-base; }
+        :not(.#{$ns}row) > & { @extend %#{$ns}inflate-base; }
+      }
+    }
+
+    @if not $prev {
+      @include m-grid-column($ns, $column-count, $h, $sz);
+    } @else {
+      @media screen and (min-width: nth($widths, 1)) {
+        .#{$ns}container { width: nth($widths, 2); }
+
+        $almost-full: $column-count - 2;
+        .#{$ns}container-inflatable .#{$ns}col-#{$sz}-#{$almost-full}
+        .#{$ns}container-inflate
+        {
+          &:not(#{$ns}left-#{$sz}):not(#{$ns}right-#{$sz}) {
+            margin-left: -10%;
+            margin-right: -10%;
+          }
+          &.#{$ns}left-#{$sz} { margin-left: -10%; }
+          &.#{$ns}right-#{$sz} { margin-right: -10%; }
+        }
+
+        @include m-grid-column($ns, $column-count, $h, $sz);
+
+        .#{$ns}clearfix-#{$prev}::after { display: none; }
+        .#{$ns}hide-#{$sz} { display: none; }
+        .#{$ns}show-#{$sz} { display: block; }
+        .#{$ns}col-#{$prev}-none {
+          width: auto;
+          float: none;
+        }
+      }
+    }
+  }
+}

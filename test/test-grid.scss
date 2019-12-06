@@ -1,0 +1,7 @@
+@import "m-sass/grid";
+@include m-grid
+  ( $namespace: x
+  , $column-count: 3
+  , $horizontal-gap: 4rem
+  , $sizes: (s: (0 0), l: (550px 500px))
+  );

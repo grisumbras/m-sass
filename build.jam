@@ -5,10 +5,18 @@ project m-sass ;
 constant VERSION : 0.0.1 ;
 
 
-alias libs ;
+alias libs : usage-requirements <include>sass ;
 
 
 package.install-data install-license : m-sass : LICENSE ;
 
-alias install : install-license ;
-explicit install install-license ;
+local paths = [ package.paths m-sass ] ;
+local datadir = [ $(paths).get datarootdir ] ;
+install install-sass
+  : [ glob-tree-ex sass : *.scss ]
+  : <location>$(datadir)
+    <install-source-root>.
+  ;
+
+alias install : install-license install-sass ;
+explicit install install-license install-sass ;
